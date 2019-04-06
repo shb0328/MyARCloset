@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 328;
+    String[] REQUIRED_PERMISSIONS  = {Manifest.permission.CAMERA, // 카메라
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};  // 외부 저장소
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +60,16 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                         .setAction("확인", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                myRequestPermissions();
+                                ActivityCompat.requestPermissions(MainActivity.this,
+                                        REQUIRED_PERMISSIONS,
+                                        PERMISSIONS_REQUEST_CODE);
                             }
                         }).show();
 
             } else { // No explanation needed, we can request the permission.
-                myRequestPermissions();
+                ActivityCompat.requestPermissions(this,
+                                                    REQUIRED_PERMISSIONS,
+                                                    PERMISSIONS_REQUEST_CODE);
             }
 
         }
@@ -84,16 +90,6 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
             });
 
 
-    }
-
-    //requestPermissons
-    private  void myRequestPermissions() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CAMERA},
-                PERMISSIONS_REQUEST_CODE);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                PERMISSIONS_REQUEST_CODE);
     }
 
     //requestPermissions callback method
