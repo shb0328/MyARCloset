@@ -1,7 +1,6 @@
 package org.ssuss.myarcloset;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,7 +10,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -23,6 +21,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 public void onClick(View view) {
                     int isOK = takePhoto();
                     if (isOK != FAIL) {
-                        addPhoto2Gallery();
+                        addImageToGallery();
                     } else {
                         Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_SHORT).show();
                     }
@@ -148,6 +147,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                         photoFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+                addImageToGallery();
                 return SUCCESS;
             }else {
                 return FAIL;
@@ -168,17 +168,23 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 storageDirectory
         );
         currentPhotoPath = image.getAbsolutePath();
-        addPhoto2Gallery();
-        System.out.println("* currentPhotoPath : "+currentPhotoPath+" "); //TODO:지우기
+        this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,Uri.fromFile(image)) );
         return image;
     }
 
-    private void addPhoto2Gallery() {
+    private void addImageToGallery() {
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         File f = new File(currentPhotoPath);
         Uri uri = Uri.fromFile(f);
         intent.setData(uri);
         this.sendBroadcast(intent);
+
+        try {
+            MediaStore.Images.Media.insertImage(getContentResolver(), f.getPath(), f.getName(), "My AR Closet");
+        }catch(FileNotFoundException fe){
+            fe.getStackTrace();
+            System.out.println("이거 아니다...");
+        }
     }
 
 }
