@@ -3,6 +3,7 @@ package org.ssuss.myarcloset;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,16 +88,31 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        /*onClickTempSignInBtn
+         지우고 다시 작성할 것!
+         */
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        /*
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
+        */
+
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    /*임시로 했고,
+    나중에 지워야돼
+     */
+    public void onClickTempSignInBtn(View v) {
+        Toast.makeText(getApplicationContext(),"임시 로그인",Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+        startActivity(intent);
     }
 
     private void populateAutoComplete() {
