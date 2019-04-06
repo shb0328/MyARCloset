@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 ie.getStackTrace();
             }
             if(photoFile != null) {
-                photoURI = FileProvider.getUriForFile( /* returns a content:// URI. */
+                photoURI = FileProvider.getUriForFile(
                         this,
                         "org.ssuss.myarcloset",
                         photoFile);
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
     String currentPhotoPath;
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyymmdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "MyARCloset_"+timeStamp;
         File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
@@ -168,6 +168,8 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 storageDirectory
         );
         currentPhotoPath = image.getAbsolutePath();
+        addPhoto2Gallery();
+        System.out.println("* currentPhotoPath : "+currentPhotoPath+" "); //TODO:지우기
         return image;
     }
 

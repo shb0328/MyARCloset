@@ -88,9 +88,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        /*onClickTempSignInBtn
-         지우고 다시 작성할 것!
-         */
+
+        // TODO: 지우고 다시 작성할 것!
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         /*
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -106,9 +105,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    /*임시로 했고,
-    나중에 지워야돼
-     */
+    //TODO:임시로 했고, 나중에 지워야돼
+
     public void onClickTempSignInBtn(View v) {
         Toast.makeText(getApplicationContext(),"임시 로그인",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(),MainActivity.class);
