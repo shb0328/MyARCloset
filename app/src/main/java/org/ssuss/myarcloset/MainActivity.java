@@ -36,26 +36,31 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(intent.resolveActivity(getPackageManager()) != null) {
-                    File photoFile = null;
-                    try {
-                        photoFile = createImageFile();
-                    }catch(IOException ie){
-                        ie.getStackTrace();
-                    }
-                    if(photoFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile( /* returns a content:// URI. */
-                                this,
-                                "org.ssuss.myarcloset",
-                                photoFile);
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
-                    }
-                }
+                takePhoto();
             }
         });
 
+    }
+
+    Uri photoURI;
+    private void takePhoto() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(intent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            }catch(IOException ie){
+                ie.getStackTrace();
+            }
+            if(photoFile != null) {
+                photoURI = FileProvider.getUriForFile( /* returns a content:// URI. */
+                        this,
+                        "org.ssuss.myarcloset",
+                        photoFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+            }
+        }
     }
 
     String currentPhotoPath;
