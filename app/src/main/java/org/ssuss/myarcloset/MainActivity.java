@@ -15,6 +15,7 @@ import androidx.core.content.FileProvider;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,14 +37,21 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                takePhoto();
+                int isOK = takePhoto();
+                if(isOK != FAIL) {
+                    addPhoto2Gallery();
+                }else {
+                    Toast.makeText(getApplicationContext(),"사진촬영에 실패했습니다.",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
     }
 
     Uri photoURI;
-    private void takePhoto() {
+    static final int SUCCESS = 1;
+    static final int FAIL = -1;
+    private int takePhoto() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if(intent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -59,7 +67,12 @@ public class MainActivity extends AppCompatActivity {
                         photoFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+                return SUCCESS;
+            }else {
+                return FAIL;
             }
+        }else{
+            return FAIL;
         }
     }
 
@@ -75,6 +88,14 @@ public class MainActivity extends AppCompatActivity {
         );
         currentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    private void addPhoto2Gallery() {
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(currentPhotoPath);
+        Uri uri = Uri.fromFile(f);
+        intent.setData(uri);
+        this.sendBroadcast(intent);
     }
 
 }
