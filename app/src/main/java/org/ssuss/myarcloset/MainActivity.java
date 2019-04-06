@@ -1,6 +1,9 @@
 package org.ssuss.myarcloset;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -10,6 +13,8 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.os.Environment;
@@ -22,9 +27,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity //implements ActivityCompat.OnRequestPermissionsResultCallback
+{
 
     static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int PERMISSIONS_REQUEST_CODE = 328;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,19 +40,97 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int isOK = takePhoto();
-                if(isOK != FAIL) {
-                    addPhoto2Gallery();
-                }else {
-                    Toast.makeText(getApplicationContext(),"사진촬영에 실패했습니다.",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        /**permission check**/
+        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+        int writeExternalStoragePermission = ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
+        /**DENIED**/
+        if(cameraPermission == PackageManager.PERMISSION_DENIED
+            && writeExternalStoragePermission == PackageManager.PERMISSION_DENIED){
+
+            //Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                Snackbar.make(getWindow().getDecorView().getRootView(),
+                        "이 앱을 실행하려면 카메라와 외부 저장소 접근 권한이 필요합니다.",
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction("확인", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                myRequestPermissions();
+                            }
+                        }).show();
+
+            } else { // No explanation needed, we can request the permission.
+                myRequestPermissions();
+            }
+
+        }
+        /**GRANTED**/
+
+            //take a picture
+            FloatingActionButton fab = findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int isOK = takePhoto();
+                    if (isOK != FAIL) {
+                        addPhoto2Gallery();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+
+    }
+
+    //requestPermissons
+    private  void myRequestPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.CAMERA},
+                PERMISSIONS_REQUEST_CODE);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                PERMISSIONS_REQUEST_CODE);
+    }
+
+    //requestPermissions callback method
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay!
+
+                } else {
+
+                    // permission denied, boo!
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)
+                            || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        Snackbar.make(getWindow().getDecorView().getRootView(),
+                                "앱이 카메라와 외부저장소에 접근이 거부되었습니다. 설정에서 앱 권한을 허용해주세요. ",
+                                Snackbar.LENGTH_INDEFINITE)
+                                .setAction("확인", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        finish();
+                                    }
+                                }).show();
+                    }
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     Uri photoURI;
