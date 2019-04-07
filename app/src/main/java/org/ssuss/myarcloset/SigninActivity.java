@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.drm.DrmStore;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +37,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     private static final String TAG = "log :: ";
 
     //UI
+    private View view;
     private EditText emailView;
     private EditText passwordView;
     private Button emailSigninBtn;
@@ -45,6 +49,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     //firebase Authentication
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth.AuthStateListener authStateListener;
 
 
     @Override
@@ -56,6 +61,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
         mAuth = FirebaseAuth.getInstance();
 
         //UI
+        view = findViewById(R.id.layout);
         emailView = (EditText) findViewById(R.id.editText_email);
         passwordView = (EditText) findViewById(R.id.editText_pw);
         emailSigninBtn = (Button) findViewById(R.id.email_sign_in_button);
@@ -68,9 +74,26 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                 email = emailView.getText().toString();
                 password = passwordView.getText().toString();
                 System.out.println("**email : "+email+"\n**password :"+password);
-                createUser(email,password);
+                signInEvent(email, password);
             }
         });
+
+        //login interface listener
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = mAuth.getCurrentUser();
+                if(user!=null){
+                    //login
+                    Intent intent = new Intent(SigninActivity.this,MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }else{
+                    //logout
+                }
+
+            }
+        };
 
         //Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -93,12 +116,52 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
      * end of onCreate()
      **/
 
+    private void signInEvent(final String id, final String pw){
+        boolean isCanceled = attemptLogin();
+        if(isCanceled == true){
+            Toast.makeText(SigninActivity.this, "E-mail과 Password를 확인해주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else {
+            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if (!task.isSuccessful()) {
+                        //login failed
+                        Log.d(TAG, task.getException().getMessage());
+                        Toast.makeText(SigninActivity.this, "등록되지 않은 회원입니다.", Toast.LENGTH_SHORT).show();
+                        final Snackbar s = Snackbar.make(view, "계정이 새로 생성됩니다.", Snackbar.LENGTH_INDEFINITE);
+                        s.setAction("YES", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                createUser(id, pw);
+                                s.dismiss();
+                            }
+                        }).show();
+                    } else {
+                        //login success
+                        Toast.makeText(SigninActivity.this, "패션피플님 환영합니다 :)", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            });
+        }
+    }
+
+
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
+        mAuth.addAuthStateListener(authStateListener); // ******************
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAuth.removeAuthStateListener(authStateListener);
     }
 
     private void updateUI(FirebaseUser user) {
@@ -196,5 +259,53 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         //if failed...
+    }
+
+
+    /**
+     * Attempts to sign in or register the account specified by the login form.
+     * If there are form errors (invalid email, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
+     */
+    private boolean attemptLogin() {
+
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            passwordView.setError(getString(R.string.error_invalid_password));
+            focusView = passwordView;
+            cancel = true;
+        }
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            emailView.setError(getString(R.string.error_field_required));
+            focusView = emailView;
+            cancel = true;
+        } else if (!isEmailValid(email)) {
+            emailView.setError(getString(R.string.error_invalid_email));
+            focusView = emailView;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        }
+
+        return cancel;
+    }
+
+    private boolean isEmailValid(String email) {
+        //TODO: Replace this with your own logic
+        return email.contains("@");
+    }
+
+    private boolean isPasswordValid(String password) {
+        //TODO: Replace this with your own logic
+        return password.length() >= 6;
     }
 }
