@@ -6,9 +6,16 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -17,6 +24,7 @@ import androidx.core.content.FileProvider;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -31,15 +39,35 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 328;
+    private static final String TAG = "Log :: ";
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.CAMERA, // 카메라
             Manifest.permission.WRITE_EXTERNAL_STORAGE};  // 외부 저장소
 
+    String userId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        userId = getIntent().getStringExtra("USER_Email");
+        System.out.println("**찍어보자 intent로 넘어온 userId : "+userId);
+
+        /**
+         * firebase storage
+         */
+        // [START storage_field_initialization]
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        // Create a storage reference from our app
+        final StorageReference storageRef = storage.getReference();
+        /**
+         * end
+         */
+
+
+        //take a picture
 
         /**permission check**/
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -80,8 +108,14 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 @Override
                 public void onClick(View view) {
                     int isOK = takePhoto();
-                    if (isOK != FAIL) {
+                    if (isOK == SUCCESS) {
                         addImageToGallery();
+                        try{
+                            uploadPhoto(storageRef,currentPhotoPath,userId);
+                        }catch (FileNotFoundException fnfe){
+                            Log.d(TAG,"**사진찍었는데, 못찾겠대!");
+                            fnfe.getStackTrace();
+                        }
                     } else {
                         Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_SHORT).show();
                     }
@@ -89,6 +123,53 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
             });
 
 
+    }
+
+    /**
+     * end of onCreate
+     */
+
+    private void uploadPhoto(StorageReference storageRef,String path,String userId) throws FileNotFoundException{
+        UploadTask uploadTask;
+        String storagePath = "/user/"+userId+"/images/";
+
+        // [START upload_file]
+        Uri file = Uri.fromFile(new File(path+".jpg"));
+        StorageReference ref = storageRef.child(storagePath+file.getLastPathSegment());
+        uploadTask = ref.putFile(file);
+
+        // Register observers to listen for when the download is done or if it fails
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Log.d(TAG,"**unsuccessful uploads!");
+                exception.getStackTrace();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                // ...
+            }
+        });
+        // [END upload_file]
+
+        /**
+         * if... you need a metadata~
+         */
+        // [START upload_with_metadata]
+        // Create file metadata including the content type
+//        StorageMetadata metadata = new StorageMetadata.Builder()
+//                .setContentType("image/jpg")
+//                .build();
+
+        // Upload the file and metadata
+//        uploadTask = storageRef.child("images/mountains.jpg").putFile(file, metadata);
+        // [END upload_with_metadata]
+        /**
+         * Do this.
+         */
     }
 
     //requestPermissions callback method
