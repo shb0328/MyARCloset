@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.drm.DrmStore;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,14 +35,16 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
 
     private static final String TAG = "log :: ";
 
+    private String address = "@myarcloset.org";
+
     //UI
     private View view;
-    private EditText emailView;
+    private EditText IDView;
     private EditText passwordView;
-    private Button emailSigninBtn;
+    private Button IDSigninBtn;
     private SignInButton googleSigninBtn;
 
-    private String email;
+    private String id;
     private String password;
 
     //firebase Authentication
@@ -62,19 +63,19 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
 
         //UI
         view = findViewById(R.id.layout);
-        emailView = (EditText) findViewById(R.id.editText_email);
+        IDView = (EditText) findViewById(R.id.editText_email);
         passwordView = (EditText) findViewById(R.id.editText_pw);
-        emailSigninBtn = (Button) findViewById(R.id.email_sign_in_button);
+        IDSigninBtn = (Button) findViewById(R.id.email_sign_in_button);
         googleSigninBtn = (SignInButton) findViewById(R.id.google_sign_in_button);
 
 
-        emailSigninBtn.setOnClickListener(new View.OnClickListener() {
+        IDSigninBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                email = emailView.getText().toString();
+                id = IDView.getText().toString();
                 password = passwordView.getText().toString();
-                System.out.println("**email : "+email+"\n**password :"+password);
-                signInEvent(email, password);
+                System.out.println("**id : "+id+"\n**password :"+password);
+                signInEvent(id, password);
             }
         });
 
@@ -123,7 +124,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
             return;
         }
         else {
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            mAuth.signInWithEmailAndPassword(id+address, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (!task.isSuccessful()) {
@@ -134,7 +135,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                         s.setAction("YES", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                createUser(id, pw);
+                                createUser(id+address, pw);
                                 s.dismiss();
                             }
                         }).show();
@@ -239,15 +240,15 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
+                            Log.d(TAG, "createUserWithID:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             updateUI(user);
-                            System.out.println("** email login // createUser 성공!");
+                            System.out.println("** id login // createUser 성공!");
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            Log.w(TAG, "createUserWithID:failure", task.getException());
                             updateUI(null);
-                            System.out.println("** email login // createUser 실패!");
+                            System.out.println("** id login // createUser 실패!");
 
                         }
 
@@ -264,7 +265,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
 
     /**
      * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
+     * If there are form errors (invalid id, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private boolean attemptLogin() {
@@ -279,14 +280,14 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            emailView.setError(getString(R.string.error_field_required));
-            focusView = emailView;
+        // Check for a valid id .
+        if (TextUtils.isEmpty(id)) {
+            IDView.setError(getString(R.string.error_field_required));
+            focusView = IDView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            emailView.setError(getString(R.string.error_invalid_email));
-            focusView = emailView;
+        } else if (!isIDValid(id)) {
+            IDView.setError(getString(R.string.error_invalid_id));
+            focusView = IDView;
             cancel = true;
         }
 
@@ -299,9 +300,10 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
         return cancel;
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isIDValid(String id) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        //return email.contains("@");
+        return id.length() >= 4;
     }
 
     private boolean isPasswordValid(String password) {
