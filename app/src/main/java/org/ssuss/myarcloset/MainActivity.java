@@ -3,6 +3,8 @@ package org.ssuss.myarcloset;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -25,6 +27,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -107,9 +110,22 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 public void onClick(View view) {
                     int isOK = takePhoto();
                     if (isOK == SUCCESS) {
+                        Log.d(TAG,"**최근사진파일경로(addGallery전):"+currentPhotoPath);
                         addImageToGallery();
+                        Log.d(TAG,"**최근사진파일경로(addGallery후):"+currentPhotoPath);
+                        
+                        //test
+                        Log.d(TAG,"**최근사진파일경로(bitmapFactory 전):"+currentPhotoPath);
+                        Bitmap bm = BitmapFactory.decodeFile(currentPhotoPath);
+                        Log.d(TAG,"**최근사진파일경로(bitmapFactory 후):"+currentPhotoPath);
+                        ImageView imageView = (ImageView)findViewById(R.id.imageView);
+                        imageView.setImageBitmap(bm);
+                        //test end
+
                         try{
+                            Log.d(TAG,"**최근사진파일경로(upload전):"+currentPhotoPath);
                             uploadPhoto(storageRef,currentPhotoPath, uid);
+                            Toast.makeText(MainActivity.this, "사진을 firebase storage에 저장했습니다.", Toast.LENGTH_SHORT).show();
                         }catch (FileNotFoundException fnfe){
                             Log.d(TAG,"**사진찍었는데, 못찾겠대!");
                             fnfe.getStackTrace();
@@ -119,6 +135,8 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                     }
                 }
             });
+
+
 
 
     }
