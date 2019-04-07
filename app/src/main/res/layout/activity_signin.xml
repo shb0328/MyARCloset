@@ -5,7 +5,8 @@
     android:id="@+id/layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SigninActivity">
+    tools:context=".SigninActivity"
+    android:background="#FFCE00">
 
     <LinearLayout
         android:layout_width="395dp"
@@ -19,6 +20,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="129dp"
+            app:srcCompat="@drawable/myarclosetmain" />
 
         <EditText
             android:id="@+id/editText_email"
@@ -40,6 +47,7 @@
             android:id="@+id/email_sign_in_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#FFFFFF"
             android:text="E-mail Sigh In" />
 
         <com.google.android.gms.common.SignInButton
