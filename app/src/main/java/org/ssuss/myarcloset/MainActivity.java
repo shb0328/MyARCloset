@@ -11,7 +11,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
     String[] REQUIRED_PERMISSIONS  = {Manifest.permission.CAMERA, // 카메라
             Manifest.permission.WRITE_EXTERNAL_STORAGE};  // 외부 저장소
 
-    String userId;
+    String uid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,8 +50,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        userId = getIntent().getStringExtra("USER_Email");
-        System.out.println("**찍어보자 intent로 넘어온 userId : "+userId);
+        uid = getIntent().getStringExtra("UID");
 
         /**
          * firebase storage
@@ -111,7 +109,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                     if (isOK == SUCCESS) {
                         addImageToGallery();
                         try{
-                            uploadPhoto(storageRef,currentPhotoPath,userId);
+                            uploadPhoto(storageRef,currentPhotoPath, uid);
                         }catch (FileNotFoundException fnfe){
                             Log.d(TAG,"**사진찍었는데, 못찾겠대!");
                             fnfe.getStackTrace();
