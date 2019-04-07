@@ -87,6 +87,7 @@ public class SigninActivity extends AppCompatActivity implements GoogleApiClient
                 if(user!=null){
                     //login
                     Intent intent = new Intent(SigninActivity.this,MainActivity.class);
+                    intent.putExtra("UID",user.getUid());
                     startActivity(intent);
                     finish();
                 }else{
