@@ -8,7 +8,12 @@ import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,6 +29,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -67,11 +73,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        //init firebase instance
+        mAuth = FirebaseAuth.getInstance();
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -88,17 +99,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        String email = mEmailView.getText().toString();
+        String password = mPasswordView.getText().toString();
 
         // TODO: 지우고 다시 작성할 것!
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        /*
+
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
-        */
+
 
 
         mLoginFormView = findViewById(R.id.login_form);
@@ -106,12 +119,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     //TODO:임시로 했고, 나중에 지워야돼
+/*
 
     public void onClickTempSignInBtn(View v) {
         Toast.makeText(getApplicationContext(),"임시 로그인",Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(getApplicationContext(),MainActivity.class);
         startActivity(intent);
     }
+*/
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
