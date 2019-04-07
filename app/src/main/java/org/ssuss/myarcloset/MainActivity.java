@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                         photoFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(intent, REQUEST_TAKE_PHOTO);
-                addImageToGallery();
                 return SUCCESS;
             }else {
                 return FAIL;
@@ -168,7 +167,6 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 storageDirectory
         );
         currentPhotoPath = image.getAbsolutePath();
-        this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,Uri.fromFile(image)) );
         return image;
     }
 
@@ -179,12 +177,6 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         intent.setData(uri);
         this.sendBroadcast(intent);
 
-        try {
-            MediaStore.Images.Media.insertImage(getContentResolver(), f.getPath(), f.getName(), "My AR Closet");
-        }catch(FileNotFoundException fe){
-            fe.getStackTrace();
-            System.out.println("이거 아니다...");
-        }
     }
 
 }
