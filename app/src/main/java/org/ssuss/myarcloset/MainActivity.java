@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         String storagePath = "/user/"+userId+"/images/";
 
         // [START upload_file]
-        Uri file = Uri.fromFile(new File(path+".jpg"));
+        Uri file = Uri.fromFile(new File(path));
         StorageReference ref = storageRef.child(storagePath+file.getLastPathSegment());
         uploadTask = ref.putFile(file);
 
