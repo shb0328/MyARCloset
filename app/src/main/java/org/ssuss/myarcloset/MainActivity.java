@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 328;
     private static final String TAG = "Log :: ";
+    private static final int REQUEST_METADATA = 5;
 
     private String[] REQUIRED_PERMISSIONS  = {Manifest.permission.CAMERA, // 카메라
             Manifest.permission.WRITE_EXTERNAL_STORAGE};  // 외부 저장소
@@ -119,10 +121,9 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 public void onClick(View view) {
                     int isOK = takePhoto();
                     if (isOK == SUCCESS) {
-//                        Log.d(TAG,"**최근사진파일경로(addGallery전):"+currentPhotoPath);
-//                        addImageToGallery();
-//                        Log.d(TAG,"**최근사진파일경로(addGallery후):"+currentPhotoPath);
-
+                        Intent intentForMetadata = new Intent(MainActivity.this, CreateMetadata.class);
+                        intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivityForResult(intentForMetadata,REQUEST_METADATA);
 
                     } else {
                         Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_LONG).show();
@@ -177,15 +178,19 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
             }
 
             //촬영한 사진 imageView에 띄우기
-            ImageView imageView = (ImageView)findViewById(R.id.imageView);
-            imageView.setImageURI(photoURI);
+//            ImageView imageView = (ImageView)findViewById(R.id.imageView);
+//            imageView.setImageURI(photoURI);
 
             //TODO:촬영한 사진 갤러리에 저장
-            addImageToGallery();
+//            addImageToGallery();
 /****/
+        }
+        else if(requestCode == REQUEST_METADATA && resultCode == RESULT_OK){
+            TopOrBottom = data.getStringExtra("TopOrBottom");
         }
     }
 
+    private String TopOrBottom;
 
     private void uploadPhoto(String path,String userId) throws FileNotFoundException{
         UploadTask uploadTask;
@@ -194,7 +199,11 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         // [START upload_file]
         Uri file = Uri.fromFile(new File(path));
         StorageReference ref = storageRef.child(storagePath+file.getLastPathSegment());
-        uploadTask = ref.putFile(file);
+        // Create file metadata including the content type
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setCustomMetadata("분류",TopOrBottom)
+                .build();
+        uploadTask = ref.putFile(file,metadata);
 
         // Register observers to listen for when the download is done or if it fails
         uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -234,6 +243,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
     static final int SUCCESS = 1;
     static final int FAIL = -1;
     private int takePhoto() {
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if(intent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -247,6 +257,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                         this,
                         "org.ssuss.myarcloset",
                         photoFile);
+
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(intent, REQUEST_TAKE_PHOTO);
 
@@ -273,13 +284,13 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         return image;
     }
 
-    private void addImageToGallery() {
-        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(currentPhotoPath);
-        Uri uri = Uri.fromFile(f);
-        intent.setData(uri);
-        this.sendBroadcast(intent);
-    }
+//    private void addImageToGallery() {
+//        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//        File f = new File(currentPhotoPath);
+//        Uri uri = Uri.fromFile(f);
+//        intent.setData(uri);
+//        this.sendBroadcast(intent);
+//    }
 
     //requestPermissions callback method
     @Override
