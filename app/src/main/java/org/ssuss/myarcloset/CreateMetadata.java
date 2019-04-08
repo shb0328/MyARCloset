@@ -16,10 +16,7 @@ public class CreateMetadata extends Activity {
 
     private RadioGroup radioGroup;
     private Button btn;
-    private String TopOrBottom;
-
-    private String getTopOrBottom() { return TopOrBottom;}
-    private void setTopOrBottom(String string) { TopOrBottom = string;}
+    private String TopOrBottomMetadata;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,25 +24,36 @@ public class CreateMetadata extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_create_metadata);
 
-        radioGroup = (RadioGroup)findViewById(R.id.topOrBottom);
+
+        final RadioButton top = findViewById(R.id.topBtn);
+        final RadioButton bottom = findViewById(R.id.bottomBtn);
+
+        radioGroup = findViewById(R.id.topOrBottom);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.topBtn){
-                    setTopOrBottom(((RadioButton)findViewById(R.id.topBtn)).getText().toString());
+                if(checkedId == R.id.topBtn) {
+                    TopOrBottomMetadata = top.getText().toString();
                 }
                 else if(checkedId == R.id.bottomBtn){
-                    setTopOrBottom(((RadioButton)findViewById(R.id.bottomBtn)).getText().toString());
+                    TopOrBottomMetadata = bottom.getText().toString();
                 }
             }
         });
 
-        btn = (Button)findViewById(R.id.button);
+        if(top.isChecked())
+            TopOrBottomMetadata = top.getText().toString();
+        else if(bottom.isChecked())
+            TopOrBottomMetadata = bottom.getText().toString();
+
+        System.out.println("** tob ::"+ TopOrBottomMetadata+"::"+top.getText().toString());
+        btn = findViewById(R.id.button);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 Intent intent = new Intent();
-                intent.putExtra("TopOrBottom",getTopOrBottom());
+                intent.putExtra("TopOrBottom",TopOrBottomMetadata);
                 setResult(RESULT_OK,intent);
                 finish();
             }
