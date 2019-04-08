@@ -3,8 +3,6 @@ package org.ssuss.myarcloset;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -12,12 +10,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +27,8 @@ import androidx.core.content.FileProvider;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -56,6 +58,9 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         uid = getIntent().getStringExtra("UID");
 
@@ -120,7 +125,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
 
                     } else {
-                        Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -129,9 +134,31 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
 
     }
+
     /**
      * end of onCreate
      **/
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+//        return super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.logout:
+                FirebaseAuth.getInstance().signOut();
+                Toast.makeText(this, "정상적으로 로그아웃 되었습니다.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(this,SigninActivity.class);
+                startActivity(intent);
+                break;
+        }
+        return true;
+    }
 
 
     @Override
@@ -143,7 +170,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
             //촬영한 사진 firebase storage에 저장
             try{
                 uploadPhoto(currentPhotoPath, uid);
-                Toast.makeText(MainActivity.this, "사진을 firebase storage에 저장했습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "사진을 Firebase Storage 에 저장했습니다.", Toast.LENGTH_LONG).show();
             }catch (FileNotFoundException fnfe){
                 Log.d(TAG,"**FileNotFoundException**");
                 fnfe.getStackTrace();
@@ -158,6 +185,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 /****/
         }
     }
+
 
     private void uploadPhoto(String path,String userId) throws FileNotFoundException{
         UploadTask uploadTask;
