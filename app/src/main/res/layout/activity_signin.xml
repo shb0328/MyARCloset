@@ -25,34 +25,47 @@
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
             android:layout_height="129dp"
+            android:paddingBottom="10dp"
             app:srcCompat="@drawable/myarclosetmain" />
 
         <EditText
             android:id="@+id/editText_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="#7FFFFFFF"
             android:ems="10"
-            android:hint="E-mail"
-            android:inputType="textEmailAddress" />
+            android:hint="ID"
+            android:inputType="textEmailAddress"
+            android:paddingBottom="10dp" />
 
         <EditText
             android:id="@+id/editText_pw"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="#7FFFFFFF"
             android:ems="10"
             android:hint="Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:paddingBottom="10dp" />
 
         <Button
             android:id="@+id/email_sign_in_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             android:background="#FFFFFF"
-            android:text="E-mail Sigh In" />
+            android:text="Sigh In" />
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/google_sign_in_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"></com.google.android.gms.common.SignInButton>
+            android:layout_height="wrap_content"
+            android:visibility="invisible"></com.google.android.gms.common.SignInButton>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
