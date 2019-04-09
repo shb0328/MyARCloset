@@ -25,9 +25,6 @@ public class CreateMetadata extends Activity {
         setContentView(R.layout.activity_create_metadata);
 
 
-        final RadioButton top = findViewById(R.id.topBtn);
-        final RadioButton bottom = findViewById(R.id.bottomBtn);
-
         radioGroup = findViewById(R.id.topOrBottom);
 
 
@@ -35,11 +32,9 @@ public class CreateMetadata extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                
                 int id = radioGroup.getCheckedRadioButtonId();
-
                 TopOrBottomMetadata = ((RadioButton)findViewById(id)).getText().toString();
-                System.out.println("** tob ::"+ TopOrBottomMetadata+"::"+top.getText().toString());
-
 
                 Intent intent = new Intent();
                 intent.putExtra("TopOrBottom",TopOrBottomMetadata);
