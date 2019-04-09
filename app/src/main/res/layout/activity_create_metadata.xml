@@ -47,11 +47,11 @@
     <Button
         android:id="@+id/button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_margin="8dp"
         android:background="#FFFFFF"
         android:text="확인"
-        android:textStyle="bold"
-        android:textColor="#000000" />
+        android:textColor="#000000"
+        android:textStyle="bold" />
 
     </LinearLayout>
