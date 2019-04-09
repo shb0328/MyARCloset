@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "정상적으로 로그아웃 되었습니다.", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(this,SigninActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 break;
         }
