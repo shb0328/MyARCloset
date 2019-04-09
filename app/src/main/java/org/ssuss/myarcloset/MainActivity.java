@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 
     private String uid;
     private StorageReference storageRef;
+    private String classification;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,14 +114,15 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         }
         /**GRANTED**/
 
-            //take a picture
+        //take a picture
             FloatingActionButton fab = findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intentForMetadata = new Intent(MainActivity.this, CreateMetadata.class);
-                    intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivityForResult(intentForMetadata,REQUEST_METADATA);
+//                    intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intentForMetadata);
+                    classification = getIntent().getStringExtra("classification");
 
                     int isOK = takePhoto();
                     if (isOK == SUCCESS) {
@@ -186,12 +187,8 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
 //            addImageToGallery();
 /****/
         }
-        else if(requestCode == REQUEST_METADATA && resultCode == RESULT_OK){
-            TopOrBottom = data.getStringExtra("TopOrBottom");
-        }
-    }
 
-    private String TopOrBottom;
+    }
 
     private void uploadPhoto(String path,String userId) throws FileNotFoundException{
         UploadTask uploadTask;
@@ -202,7 +199,7 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         StorageReference ref = storageRef.child(storagePath+file.getLastPathSegment());
         // Create file metadata including the content type
         StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCustomMetadata("분류",TopOrBottom)
+                .setCustomMetadata("분류", classification)
                 .build();
         uploadTask = ref.putFile(file,metadata);
 

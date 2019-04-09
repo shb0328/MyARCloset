@@ -32,13 +32,13 @@ public class CreateMetadata extends Activity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+
                 int id = radioGroup.getCheckedRadioButtonId();
                 TopOrBottomMetadata = ((RadioButton)findViewById(id)).getText().toString();
 
                 Intent intent = new Intent();
-                intent.putExtra("TopOrBottom",TopOrBottomMetadata);
-                setResult(RESULT_OK,intent);
+                intent.putExtra("classification",TopOrBottomMetadata);
+//                setResult(RESULT_OK,intent);
                 finish();
             }
         });
