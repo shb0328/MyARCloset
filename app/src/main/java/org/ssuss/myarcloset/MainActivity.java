@@ -119,11 +119,12 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Intent intentForMetadata = new Intent(MainActivity.this, CreateMetadata.class);
+                    intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivityForResult(intentForMetadata,REQUEST_METADATA);
+
                     int isOK = takePhoto();
                     if (isOK == SUCCESS) {
-                        Intent intentForMetadata = new Intent(MainActivity.this, CreateMetadata.class);
-                        intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivityForResult(intentForMetadata,REQUEST_METADATA);
 
                     } else {
                         Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_LONG).show();
