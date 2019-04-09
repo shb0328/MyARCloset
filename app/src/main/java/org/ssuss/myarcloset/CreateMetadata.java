@@ -72,8 +72,6 @@ public class CreateMetadata extends Activity {
                 classification = ((RadioButton)findViewById(id)).getText().toString();
 
                 takePhoto();
-                finish();
-
 
             }
         });
@@ -186,6 +184,7 @@ public class CreateMetadata extends Activity {
             try{
                 uploadPhoto(currentPhotoPath, uid);
                 Toast.makeText(CreateMetadata.this, "사진을 Firebase Storage 에 저장했습니다.", Toast.LENGTH_LONG).show();
+                finish();
             }catch (FileNotFoundException fnfe){
                 Log.d(TAG,"**FileNotFoundException**");
                 fnfe.getStackTrace();
