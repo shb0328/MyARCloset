@@ -31,7 +31,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -43,16 +42,13 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity //implements ActivityCompat.OnRequestPermissionsResultCallback
 {
 
-    static final int REQUEST_TAKE_PHOTO = 1;
     private static final int PERMISSIONS_REQUEST_CODE = 328;
     private static final String TAG = "Log :: ";
-    private static final int REQUEST_METADATA = 5;
 
     private String[] REQUIRED_PERMISSIONS  = {Manifest.permission.CAMERA, // 카메라
             Manifest.permission.WRITE_EXTERNAL_STORAGE};  // 외부 저장소
 
     private String uid;
-    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,18 +61,6 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         uid = getIntent().getStringExtra("UID");
-
-        /**
-         * init firebase storage
-         */
-        // [START storage_field_initialization]
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-
-        // Create a storage reference from our app
-        storageRef = storage.getReference();
-        /**
-         * end
-         */
 
 
         //take a picture
@@ -114,21 +98,16 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
         }
         /**GRANTED**/
 
-            //take a picture
+        //take a picture
             FloatingActionButton fab = findViewById(R.id.fab);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intentForMetadata = new Intent(MainActivity.this, CreateMetadata.class);
-                    intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivityForResult(intentForMetadata,REQUEST_METADATA);
+//                    intentForMetadata.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intentForMetadata.putExtra("UID",uid);
+                    startActivity(intentForMetadata);
 
-                    int isOK = takePhoto();
-                    if (isOK == SUCCESS) {
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), "사진촬영에 실패했습니다.", Toast.LENGTH_LONG).show();
-                    }
                 }
             });
 
@@ -163,127 +142,8 @@ public class MainActivity extends AppCompatActivity //implements ActivityCompat.
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
 
-/** This is THE TIMING at which the picture was taken!! **/
-            //촬영한 사진 firebase storage에 저장
-            try{
-                uploadPhoto(currentPhotoPath, uid);
-                Toast.makeText(MainActivity.this, "사진을 Firebase Storage 에 저장했습니다.", Toast.LENGTH_LONG).show();
-            }catch (FileNotFoundException fnfe){
-                Log.d(TAG,"**FileNotFoundException**");
-                fnfe.getStackTrace();
-            }
 
-            //촬영한 사진 imageView에 띄우기
-//            ImageView imageView = (ImageView)findViewById(R.id.imageView);
-//            imageView.setImageURI(photoURI);
-
-            //TODO:촬영한 사진 갤러리에 저장
-//            addImageToGallery();
-/****/
-        }
-        else if(requestCode == REQUEST_METADATA && resultCode == RESULT_OK){
-            TopOrBottom = data.getStringExtra("TopOrBottom");
-        }
-    }
-
-    private String TopOrBottom;
-
-    private void uploadPhoto(String path,String userId) throws FileNotFoundException{
-        UploadTask uploadTask;
-        String storagePath = "/user/"+userId+"/images/";
-
-        // [START upload_file]
-        Uri file = Uri.fromFile(new File(path));
-        StorageReference ref = storageRef.child(storagePath+file.getLastPathSegment());
-        // Create file metadata including the content type
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCustomMetadata("분류",TopOrBottom)
-                .build();
-        uploadTask = ref.putFile(file,metadata);
-
-        // Register observers to listen for when the download is done or if it fails
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Log.d(TAG,"**unsuccessful uploads!");
-                exception.getStackTrace();
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-            }
-        });
-        // [END upload_file]
-
-        /**
-         * if... you need a metadata~
-         */
-        // [START upload_with_metadata]
-        // Create file metadata including the content type
-//        StorageMetadata metadata = new StorageMetadata.Builder()
-//                .setContentType("image/jpg")
-//                .build();
-
-        // Upload the file and metadata
-//        uploadTask = storageRef.child("images/mountains.jpg").putFile(file, metadata);
-        // [END upload_with_metadata]
-        /**
-         * Do this.
-         */
-    }
-
-    Uri photoURI;
-    static final int SUCCESS = 1;
-    static final int FAIL = -1;
-    private int takePhoto() {
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if(intent.resolveActivity(getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            }catch(IOException ie){
-                ie.getStackTrace();
-            }
-            if(photoFile != null) {
-                photoURI = FileProvider.getUriForFile(
-                        this,
-                        "org.ssuss.myarcloset",
-                        photoFile);
-
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(intent, REQUEST_TAKE_PHOTO);
-
-                return SUCCESS;
-            }else {
-                return FAIL;
-            }
-        }else{
-            return FAIL;
-        }
-    }
-
-    String currentPhotoPath;
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "MyARCloset_"+timeStamp;
-        File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDirectory
-        );
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
 
 //    private void addImageToGallery() {
 //        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
